@@ -64,7 +64,7 @@ fi
 # Create column format of /etc/fstab
 printf "#Device Mountpoint FStype Options FSdump FSCK\n" > ${TEMP_FSTAB}
 
-cat ${FSTAB} | egrep -v '^#' >> ${TEMP_FSTAB}
+cat ${FSTAB} | egrep -v '^#|^$' >> ${TEMP_FSTAB}
 
 # Tell them about generating the header
 printf "Generating the new /etc/fstab header\n"

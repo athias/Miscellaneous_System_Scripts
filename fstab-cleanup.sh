@@ -3,22 +3,11 @@
 #
 # ./fstab-cleanup
 #
-# Dependencies:
-#	none
+# Created by:	Matthew R. Sawyer
 #
-# Purpose:
-#	This script will clean up the /etc/fstab.  It will provide basic system
-#	information and modification date-stamp, and it will put the fstab into
-#	a column format.
-#
-################################################################################
-#
-# Created by:		Matthew R. Sawyer
-# Last Modified By:	Matthew R. Sawyer
-#
-# Modification History:
-#
-# 20160803 sawyerm	Initial Creation of the fstab cleanup script
+# Purpose:	This script will clean up the /etc/fstab.  It will provide basic
+#		system information and modification date-stamp, and it will put
+#		the fstab into a column format.
 #
 ################################################################################
 # Establish Variables and perform basic checks
@@ -73,7 +62,7 @@ else
 fi
 
 # Create column format of /etc/fstab
-printf "#Device Mountpoint FStype Options FSCK FSdump\n" > ${TEMP_FSTAB}
+printf "#Device Mountpoint FStype Options FSdump FSCK\n" > ${TEMP_FSTAB}
 
 cat ${FSTAB} | egrep -v '^#' >> ${TEMP_FSTAB}
 

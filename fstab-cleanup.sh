@@ -63,6 +63,7 @@ fi
 
 # Create column format of /etc/fstab
 printf "#Device Mountpoint FStype Options FSdump FSCK\n" > ${TEMP_FSTAB}
+printf "####### ########## ###### ####### ###### ####\n" > ${TEMP_FSTAB}
 
 cat ${FSTAB} | egrep -v '^#|^$' >> ${TEMP_FSTAB}
 

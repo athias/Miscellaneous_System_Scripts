@@ -1,0 +1,5 @@
+# Custom .bashrc configurations
+export HISTCONTROL=ignoredups:erasedups
+export HISTSIZE=9999
+export PROMPT_COMMAND="history -n; history -w; history -c; history -r; ${PROMPT_COMMAND}"
+export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;36m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "

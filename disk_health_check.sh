@@ -1,16 +1,17 @@
 #!/bin/bash
 ################################################################################
 #
-# ./disk_health_check.sh
+# ./local_repo_update.sh
 #
 # Created by:	Matthew R. Sawyer
 #
-# Intended for use within crontab.  Performs a health check for all disks on the
-# system that are smart control enabled.  The log is then mailed to root for
-# review.
-# Note:  It is highly recommended to configure your system to send root mail
-#        to a centralized address for review.
-# Note:  The LOG_DIR variable should be customized for your particular needs
+# Intended for use within crontab.  Performs a reposync between the connected
+# repository and the local repository.  It will then create a repo based on the
+# base and optional directories identified.
+# NOTE:  It is highly recommended to configure your system to send root mail to
+#        a centralized address for review.
+# NOTE:  The LOG_DIR variable should be customized to your system
+# NOTE:  The REPO_BASE_DIR variable should be customized to your system
 #
 ################################################################################
 # Establish Variables and perform basic checks
@@ -20,8 +21,11 @@ CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H.%M.%S")
 CUR_HOST=`hostname -s`
 ORIG_DIR=`pwd`
-LOG_DIR=/storage/sysadmin/logs/disk_health_check
-CUR_LOG=${LOG_DIR}/disk_health_check.${CUR_HOST}.${CUR_DATE}.log
+LOG_DIR=/storage/sysadmin/logs/local_repo_update
+CUR_LOG=${LOG_DIR}/local_repo_update.${CUR_HOST}.${CUR_DATE}.log
+REPO_BASE_DIR=/storage/sysadmin/Patches
+RHEL_7_BASE_REPO=${REPO_BASE_DIR}/rhel-7-server-rpms/Packages/
+RHEL_7_OPTIONAL_REPO=${REPO_BASE_DIR}/rhel-7-server-optional-rpms/Packages/
 
 ################################################################################
 # Function - End of Script cleanup
@@ -30,7 +34,7 @@ CUR_LOG=${LOG_DIR}/disk_health_check.${CUR_HOST}.${CUR_DATE}.log
 end_script ()
 {
   sleep 1
-  cd $ORIG_DIR
+  cd ${ORIG_DIR}
   exit
 }
 
@@ -44,7 +48,7 @@ if [[ "$EUID" != "0" ]];then
 fi
 
 ################################################################################
-# Verify Logging directory and file
+# Check on Log
 ################################################################################
 
 if [[ ! -d ${LOG_DIR} ]];then
@@ -62,33 +66,31 @@ chown root:root ${CUR_LOG}
 chmod 600 ${CUR_LOG}
 
 ################################################################################
-# Perform the Disk Health Check
+# Perform a Reposync
 ################################################################################
 
 # Header
-printf "################################\n" | tee -a ${CUR_LOG}
-printf "# Daily Disk Health Status Log #\n" | tee -a ${CUR_LOG}
-printf "################################\n\n" | tee -a ${CUR_LOG}
+printf "###############################\n" | tee -a ${CUR_LOG}
+printf "# Daily Repository Update Log #\n" | tee -a ${CUR_LOG}
+printf "###############################\n\n" | tee -a ${CUR_LOG}
 printf "Started at Date:\t${CUR_DATE}\n" | tee -a ${CUR_LOG}
 printf "Started at Time:\t${CUR_TIME}\n\n" | tee -a ${CUR_LOG}
 
-# Discover Disks
-printf "##### Scanning for Disks #####\n" | tee -a ${CUR_LOG}
-ALL_DISKS=`smartctl --scan | awk '{print $1}'`
-printf "\n" | tee -a ${CUR_LOG}
+# Perform Repository Sync
+printf "##### Starting reposync #####\n" | tee -a ${CUR_LOG}
+reposync -n -r rhel-7-server-optional-rpms -r rhel-7-server-rpms -p ${REPO_BASE_DIR} | egrep -v 'ETA' | tee -a ${CUR_LOG}
 sleep 2
 
-# Check Disk Status
-printf "##### Checking Health Status #####\n" | tee -a ${CUR_LOG}
+# Create Repository for Base RPMs
 printf "\n" | tee -a ${CUR_LOG}
-printf "Device\t\tStatus\n" | tee -a ${CUR_LOG}
-printf "######\t\t######\n" | tee -a ${CUR_LOG}
+printf "##### Creating Base RPM Repo #####\n" | tee -a ${CUR_LOG}
+createrepo --update ${RHEL_7_BASE_REPO} | tee -a ${CUR_LOG}
+sleep 2
 
-for CUR_DISK in ${ALL_DISKS};do
-  printf "${CUR_DISK}\t" | tee -a ${CUR_LOG}
-  smartctl -H ${CUR_DISK} | grep "SMART overall-health self-assessment test result:" | awk '{print $6}' | tee -a ${CUR_LOG}
-done
-
+# Create Repository for Optional RPMs
+printf "\n" | tee -a ${CUR_LOG}
+printf "##### Creating Base RPM Repo #####\n" | tee -a ${CUR_LOG}
+createrepo --update ${RHEL_7_OPTIONAL_REPO} | tee -a ${CUR_LOG}
 sleep 2
 
 # Close out log
@@ -98,7 +100,10 @@ printf "# Finished - Review Log to Verify Status #\n" | tee -a ${CUR_LOG}
 printf "##########################################\n" | tee -a ${CUR_LOG}
 
 # Mail Log to root
-cat ${CUR_LOG} | tr -d \\r | mailx -s "disk health check - ${CUR_DATE}" root
+cat ${CUR_LOG} | tr -d \\r | mailx -s "Local Repo Update Log - ${CUR_DATE}"
+
+# End Script
+end_script
 
 ################################################################################
 # End of Script

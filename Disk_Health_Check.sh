@@ -1,12 +1,16 @@
 #!/bin/bash
 ################################################################################
 #
-# ./Daily_Disk_Health_Check.sh
+# ./disk_health_check.sh
 #
-# Created by:  Matthew R. Sawyer
+# Created by:	Matthew R. Sawyer
 #
-# Purpose:  Intended for use within crontab - Performs a daily health check
-#	          for all of the disks available on the system.
+# Intended for use within crontab.  Performs a health check for all disks on the
+# system that are smart control enabled.  The log is then mailed to root for
+# review.
+# Note:  It is highly recommended to configure your system to send root mail
+#        to a centralized address for review.
+# Note:  The LOG_DIR variable should be customized for your particular needs
 #
 ################################################################################
 # Establish Variables and perform basic checks
@@ -14,9 +18,10 @@
 
 CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H.%M.%S")
+CUR_HOST=`hostname -s`
 ORIG_DIR=`pwd`
-LOG_DIR=/storage/sysadmin/logs/Daily_Repo_Update
-CUR_LOG=${LOG_DIR}/Asgard_Repo_Update.log.${CUR_DATE}
+LOG_DIR=/storage/sysadmin/logs/disk_health_check
+CUR_LOG=${LOG_DIR}/disk_health_check.${CUR_HOST}.${CUR_DATE}.log
 
 ################################################################################
 # Function - End of Script cleanup
@@ -39,7 +44,7 @@ if [[ "$EUID" != "0" ]];then
 fi
 
 ################################################################################
-# Check on Log
+# Verify Logging directory and file
 ################################################################################
 
 if [[ ! -d ${LOG_DIR} ]];then
@@ -57,7 +62,7 @@ chown root:root ${CUR_LOG}
 chmod 600 ${CUR_LOG}
 
 ################################################################################
-# Perform a Reposync
+# Perform the Disk Health Check
 ################################################################################
 
 # Header
@@ -71,7 +76,7 @@ printf "Started at Time:\t${CUR_TIME}\n\n" | tee -a ${CUR_LOG}
 printf "##### Scanning for Disks #####\n" | tee -a ${CUR_LOG}
 ALL_DISKS=`smartctl --scan | awk '{print $1}'`
 printf "\n" | tee -a ${CUR_LOG}
-sleep 5
+sleep 2
 
 # Check Disk Status
 printf "##### Checking Health Status #####\n" | tee -a ${CUR_LOG}
@@ -83,7 +88,8 @@ for CUR_DISK in ${ALL_DISKS};do
   printf "${CUR_DISK}\t" | tee -a ${CUR_LOG}
   smartctl -H ${CUR_DISK} | grep "SMART overall-health self-assessment test result:" | awk '{print $6}' | tee -a ${CUR_LOG}
 done
-sleep 5
+
+sleep 2
 
 # Close out log
 printf "\n" | tee -a ${CUR_LOG}
@@ -92,7 +98,7 @@ printf "# Finished - Review Log to Verify Status #\n" | tee -a ${CUR_LOG}
 printf "##########################################\n" | tee -a ${CUR_LOG}
 
 # Mail Log to root
-cat ${CUR_LOG} | mail -s "Daily Disk Health Status Log - ${CUR_DATE}" root
+cat ${CUR_LOG} | tr -d \\r | mailx -s "disk health check - ${CUR_DATE}" root
 
 ################################################################################
 # End of Script

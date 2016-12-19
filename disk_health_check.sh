@@ -100,7 +100,7 @@ printf "# Finished - Review Log to Verify Status #\n" | tee -a ${CUR_LOG}
 printf "##########################################\n" | tee -a ${CUR_LOG}
 
 # Mail Log to root
-cat ${CUR_LOG} | tr -d \\r | mailx -s "Local Repo Update Log - ${CUR_DATE}"
+cat ${CUR_LOG} | tr -d \\r | mailx -s "Local Repo Update Log - ${CUR_DATE}" root
 
 # End Script
 end_script

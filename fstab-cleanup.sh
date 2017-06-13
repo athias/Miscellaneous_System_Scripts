@@ -7,7 +7,7 @@
 #
 # Purpose:	This script will clean up the /etc/fstab.  It will provide basic
 #		system information and modification date-stamp, and it will put
-#		the fstab into a column format.
+#		the fstab into an organized column format.
 #
 ################################################################################
 # Establish Variables and perform basic checks
@@ -17,22 +17,9 @@ CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H%M%S")
 CUR_DATE_TIME=$(date +"%Y%m%d_%H%M%S")
 CUR_HOST=`uname -n`
-ROOT_UID=0
 ORIG_DIR=`pwd`
 FSTAB=/etc/fstab
 TEMP_FSTAB=/tmp/fstab
-
-cd /
-
-################################################################################
-# Verify the script is being run by root
-################################################################################
-
-if [[ "$UID" != "$ROOT_UID" ]]
-then
-	printf "\n\e[0;31mERROR\e[0m\tThis script must be run as root\n"
-	end_script
-fi
 
 ################################################################################
 # Function - End of Script cleanup
@@ -40,25 +27,40 @@ fi
 
 end_script ()
 {
-	sleep 1
-	cd $ORIG_DIR
-	exit
+  sleep 1
+  cd $ORIG_DIR
+  exit
+}
+
+################################################################################
+# Function - Check if user is root
+################################################################################
+
+root_uid_check ()
+{
+  if [[ "$EUID" != "0" ]];then
+    printf "\n\e[0;31mERROR\e[0m\tThis script must be run as root\n"
+    end_script
+  fi
 }
 
 ################################################################################
 # Perfom /etc/fstab cleanup
 ################################################################################
 
+# Perform root UID check
+root_uid_check
+
 # Back up previous /etc/fstab
 if [[ -f ${FSTAB}.${CUR_DATE} ]];then
-	printf "\n\e[0;33;40mNOTICE:\e[0m\tThis Script has been run already today; backing up /etc/fstab by date-time now.\n\n"
-	printf "Backing up /etc/fstab now.\n"
-	cp ${FSTAB} ${FSTAB}.${CUR_DATE_TIME}
-	FSTAB_BAK=${FSTAB}.${CUR_DATE_TIME}
+  printf "\n\e[0;33;40mNOTICE:\e[0m\tThis Script has been run already today; backing up /etc/fstab by date-time now.\n\n"
+  printf "Backing up /etc/fstab now.\n"
+  cp ${FSTAB} ${FSTAB}.${CUR_DATE_TIME}
+  FSTAB_BAK=${FSTAB}.${CUR_DATE_TIME}
 else
-	printf "Backing up /etc/fstab now.\n"
-	cp ${FSTAB} ${FSTAB}.${CUR_DATE}
-	FSTAB_BAK=${FSTAB}.${CUR_DATE}
+  printf "Backing up /etc/fstab now.\n"
+  cp ${FSTAB} ${FSTAB}.${CUR_DATE}
+  FSTAB_BAK=${FSTAB}.${CUR_DATE}
 fi
 
 # Create column format of /etc/fstab

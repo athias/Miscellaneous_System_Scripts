@@ -1,17 +1,12 @@
 #!/bin/bash
 ################################################################################
 #
-# ./local_repo_update.sh
+# ./Daily_Disk_Health_Check.sh
 #
-# Created by:	Matthew R. Sawyer
+# Created by:  Matthew R. Sawyer
 #
-# Intended for use within crontab.  Performs a reposync between the connected
-# repository and the local repository.  It will then create a repo based on the
-# base and optional directories identified.
-# NOTE:  It is highly recommended to configure your system to send root mail to
-#        a centralized address for review.
-# NOTE:  The LOG_DIR variable should be customized to your system
-# NOTE:  The REPO_BASE_DIR variable should be customized to your system
+# Purpose:  Intended for use within crontab - Performs a daily health check
+#	          for all of the disks available on the system.
 #
 ################################################################################
 # Establish Variables and perform basic checks
@@ -19,13 +14,9 @@
 
 CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H.%M.%S")
-CUR_HOST=`hostname -s`
 ORIG_DIR=`pwd`
-LOG_DIR=/storage/sysadmin/logs/local_repo_update
-CUR_LOG=${LOG_DIR}/local_repo_update.${CUR_HOST}.${CUR_DATE}.log
-REPO_BASE_DIR=/storage/sysadmin/Patches
-RHEL_7_BASE_REPO=${REPO_BASE_DIR}/rhel-7-server-rpms/Packages/
-RHEL_7_OPTIONAL_REPO=${REPO_BASE_DIR}/rhel-7-server-optional-rpms/Packages/
+LOG_DIR=/storage/sysadmin/logs/Daily_Repo_Update
+CUR_LOG=${LOG_DIR}/Asgard_Repo_Update.log.${CUR_DATE}
 
 ################################################################################
 # Function - End of Script cleanup
@@ -34,7 +25,7 @@ RHEL_7_OPTIONAL_REPO=${REPO_BASE_DIR}/rhel-7-server-optional-rpms/Packages/
 end_script ()
 {
   sleep 1
-  cd ${ORIG_DIR}
+  cd $ORIG_DIR
   exit
 }
 
@@ -70,28 +61,29 @@ chmod 600 ${CUR_LOG}
 ################################################################################
 
 # Header
-printf "###############################\n" | tee -a ${CUR_LOG}
-printf "# Daily Repository Update Log #\n" | tee -a ${CUR_LOG}
-printf "###############################\n\n" | tee -a ${CUR_LOG}
+printf "################################\n" | tee -a ${CUR_LOG}
+printf "# Daily Disk Health Status Log #\n" | tee -a ${CUR_LOG}
+printf "################################\n\n" | tee -a ${CUR_LOG}
 printf "Started at Date:\t${CUR_DATE}\n" | tee -a ${CUR_LOG}
 printf "Started at Time:\t${CUR_TIME}\n\n" | tee -a ${CUR_LOG}
 
-# Perform Repository Sync
-printf "##### Starting reposync #####\n" | tee -a ${CUR_LOG}
-reposync -n -r rhel-7-server-optional-rpms -r rhel-7-server-rpms -p ${REPO_BASE_DIR} | egrep -v 'ETA' | tee -a ${CUR_LOG}
-sleep 2
-
-# Create Repository for Base RPMs
+# Discover Disks
+printf "##### Scanning for Disks #####\n" | tee -a ${CUR_LOG}
+ALL_DISKS=`smartctl --scan | awk '{print $1}'`
 printf "\n" | tee -a ${CUR_LOG}
-printf "##### Creating Base RPM Repo #####\n" | tee -a ${CUR_LOG}
-createrepo --update ${RHEL_7_BASE_REPO} | tee -a ${CUR_LOG}
-sleep 2
+sleep 5
 
-# Create Repository for Optional RPMs
+# Check Disk Status
+printf "##### Checking Health Status #####\n" | tee -a ${CUR_LOG}
 printf "\n" | tee -a ${CUR_LOG}
-printf "##### Creating Base RPM Repo #####\n" | tee -a ${CUR_LOG}
-createrepo --update ${RHEL_7_OPTIONAL_REPO} | tee -a ${CUR_LOG}
-sleep 2
+printf "Device\t\tStatus\n" | tee -a ${CUR_LOG}
+printf "######\t\t######\n" | tee -a ${CUR_LOG}
+
+for CUR_DISK in ${ALL_DISKS};do
+  printf "${CUR_DISK}\t" | tee -a ${CUR_LOG}
+  smartctl -H ${CUR_DISK} | grep "SMART overall-health self-assessment test result:" | awk '{print $6}' | tee -a ${CUR_LOG}
+done
+sleep 5
 
 # Close out log
 printf "\n" | tee -a ${CUR_LOG}
@@ -100,10 +92,7 @@ printf "# Finished - Review Log to Verify Status #\n" | tee -a ${CUR_LOG}
 printf "##########################################\n" | tee -a ${CUR_LOG}
 
 # Mail Log to root
-cat ${CUR_LOG} | tr -d \\r | mailx -s "Local Repo Update Log - ${CUR_DATE}" root
-
-# End Script
-end_script
+cat ${CUR_LOG} | mail -s "Daily Disk Health Status Log - ${CUR_DATE}" root
 
 ################################################################################
 # End of Script

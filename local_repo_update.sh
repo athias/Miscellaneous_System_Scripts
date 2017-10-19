@@ -38,7 +38,7 @@ fi
 end_script ()
 {
 	sleep 1
-	cd $ORIG_DIR
+	cd ${ORIG_DIR}
 	exit
 }
 

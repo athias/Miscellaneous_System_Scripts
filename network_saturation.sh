@@ -94,8 +94,8 @@ pid_check ()
   PID_FILE=/var/run/network_saturation.pid
 
   if [[ -f ${PID_FILE} ]];then
-    CUR_PID=`cat ${PID_FILE}`
-    if [[ -z `ps --no-headers -p ${CUR_PID}` ]];then
+    CUR_PID=$(cat ${PID_FILE})
+    if [[ -z $(ps --no-headers -p ${CUR_PID}) ]];then
       printf "\n\e[0;33mNOTICE:\e[0m\tThe previous PID was not cleaned up properly - fixing this now...\n"
       rm -f ${PID_FILE}
     else
@@ -130,7 +130,7 @@ printf "\n##### Network Saturation Test Variable Input #####\n\n"
 while [[ ${IP_CHECK} != "1" ]];do
   printf "Please input the IP you want to send to: "
   read
-  if [[ -n `ipcalc -cs ${REPLY} && echo success` ]];then
+  if [[ -n $(ipcalc -cs ${REPLY} && echo success) ]];then
     printf "\nThe IP you designated is \"${REPLY}\" - Is this correct? [y/n] "
     read yn
     if [[ $yn =~ [Yy][Ee][Ss]|[Yy] ]];then
@@ -168,22 +168,22 @@ while [[ ${ITER_CHECK} != "1" ]];do
 done
 
 printf "List of interfaces to choose from:\n"
-DEVICES=`sar -n DEV 1 1 | egrep -v "IFACE|Average|^$|\(|\)" | awk '{print $3}'`
-for i in ${DEVICES};do
+DEVICES=$(sar -n DEV 1 1 | egrep -v "IFACE|Average|^$|\(|\)" | awk '{print $3}')
+for i in ${DEVICES}; do
   printf "\t${i}\n"
 done
 printf "\n"
 
-while [[ ${DEV_CHECK} != "1" ]];do
+while [[ ${DEV_CHECK} != "1" ]]; do
   printf "Please input the device you want to monitor: "
   read
-  #while [[ ${DEV_MATCH} != "1" ]];do
-  for i in ${DEVICES};do
+  #while [[ ${DEV_MATCH} != "1" ]]; do
+  for i in ${DEVICES}; do
     if [[ ${i} == ${REPLY} ]];then
       DEV_MATCH=1
     fi
   done
-  if [[ ${DEV_MATCH} == "1" ]];then
+  if [[ ${DEV_MATCH} == "1" ]]; then
     DEV_CHECK=1
     DEV_MON=${REPLY}
   else

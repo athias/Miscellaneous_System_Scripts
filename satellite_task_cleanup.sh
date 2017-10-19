@@ -26,8 +26,8 @@ fi
 # General Purpose
 CUR_DATE=$(date +"%Y%m%d") # YYYYMMDD
 CUR_TIME=$(date +"%H%M%S") # HHMMSS
-CUR_HOST=`uname -n`
-ORIG_DIR=`pwd`
+CUR_HOST=$(uname -n)
+ORIG_DIR=$(pwd)
 
 # Customizable Variables
 BASE_DIR=/root/scripts
@@ -123,14 +123,14 @@ sleep 2
 
 # Verify Postgres is Running
 printf "\n\e[0;34m##### Verifying Postgres is Running #####\e[0m\n\n" | tee -a ${CUR_LOG}
-if [[ -n `service postgresql status | grep "is running..."` ]];then
+if [[ -n $(service postgresql status | grep "is running...") ]];then
   printf "\e[0;32m\tPostgres is running\e[0m\n" | tee -a ${CUR_LOG}
 else
   printf "\e[0;33m\tPostgres is not running, attempting to restart\e[0m\n" | tee -a ${CUR_LOG}
   sleep 2
   service postgresql start | tee -a ${CUR_LOG}
   sleep 2
-  if [[ -n `service postgresql status | grep "is running..."` ]];then
+  if [[ -n $(service postgresql status | grep "is running...") ]];then
     printf "\e[0;32m\tPostgres is running\e[0m\n" | tee -a ${CUR_LOG}
   else
     printf "\e[0;31m\tPostgres failed to restart correctly, please investigate\e[0m\n" | tee -a ${CUR_LOG}

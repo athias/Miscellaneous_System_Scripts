@@ -14,7 +14,7 @@
 
 CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H.%M.%S")
-ORIG_DIR=`pwd`
+ORIG_DIR=$(pwd)
 LOG_DIR=/storage/sysadmin/logs/Daily_Repo_Update
 CUR_LOG=${LOG_DIR}/Asgard_Repo_Update.log.${CUR_DATE}
 
@@ -69,7 +69,7 @@ printf "Started at Time:\t${CUR_TIME}\n\n" | tee -a ${CUR_LOG}
 
 # Discover Disks
 printf "##### Scanning for Disks #####\n" | tee -a ${CUR_LOG}
-ALL_DISKS=`smartctl --scan | awk '{print $1}'`
+ALL_DISKS=$(smartctl --scan | awk '{print $1}')
 printf "\n" | tee -a ${CUR_LOG}
 sleep 5
 

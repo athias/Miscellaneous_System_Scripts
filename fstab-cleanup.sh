@@ -16,8 +16,8 @@
 CUR_DATE=$(date +"%Y%m%d")
 CUR_TIME=$(date +"%H%M%S")
 CUR_DATE_TIME=$(date +"%Y%m%d_%H%M%S")
-CUR_HOST=`uname -n`
-ORIG_DIR=`pwd`
+CUR_HOST=$(uname -n)
+ORIG_DIR=$(pwd)
 FSTAB=/etc/fstab
 TEMP_FSTAB=/tmp/fstab
 
@@ -28,7 +28,7 @@ TEMP_FSTAB=/tmp/fstab
 end_script ()
 {
   sleep 1
-  cd $ORIG_DIR
+  cd ${ORIG_DIR}
   exit
 }
 

@@ -169,21 +169,21 @@ done
 
 printf "List of interfaces to choose from:\n"
 DEVICES=$(sar -n DEV 1 1 | egrep -v "IFACE|Average|^$|\(|\)" | awk '{print $3}')
-for i in ${DEVICES}; do
+for i in ${DEVICES};do
   printf "\t${i}\n"
 done
 printf "\n"
 
-while [[ ${DEV_CHECK} != "1" ]]; do
+while [[ ${DEV_CHECK} != "1" ]];do
   printf "Please input the device you want to monitor: "
   read
   #while [[ ${DEV_MATCH} != "1" ]]; do
-  for i in ${DEVICES}; do
+  for i in ${DEVICES};do
     if [[ ${i} == ${REPLY} ]];then
       DEV_MATCH=1
     fi
   done
-  if [[ ${DEV_MATCH} == "1" ]]; then
+  if [[ ${DEV_MATCH} == "1" ]];then
     DEV_CHECK=1
     DEV_MON=${REPLY}
   else

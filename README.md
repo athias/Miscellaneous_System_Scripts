@@ -12,8 +12,19 @@ A collection of miscellaneous scripts I've created over time to assist with rout
 * disk_health_check.sh
   * Intended for a crontab - Performs a health check of your disks and sends the log to root for review
   * NOTE: It is expected you have your root mail forwarded to a location you can review
+* satellite_task_cleanup.sh
+  * Specific for Red Hat Satellite Server
+  * Cleans up tasks within the foreman database which helps with performance
+* network_saturation.sh
+  * Performs a UDP dump onto a specific port to artificially saturate a line
+  * Designed to be used for testing purposes only
   
 ## Update History
+* 20171022
+  * Added scripts into readme
+    * satellite_task_cleanup.sh was added previously and not mentioned
+    * network_saturation.sh was added previously and not mentioned
+  * Merged request to change backtick command calls into $() format
 * 20161218
   * Recategorized this repository to my miscellaneous scripts collection
   * Updated this README to reflect repository recategorization

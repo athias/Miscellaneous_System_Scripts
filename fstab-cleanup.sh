@@ -9,6 +9,8 @@
 #		system information and modification date-stamp, and it will put
 #		the fstab into an organized column format.
 #
+# License:	GPLv3+
+#
 ################################################################################
 # Establish Variables and perform basic checks
 ################################################################################

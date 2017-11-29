@@ -1,6 +1,17 @@
 # Custom .bashrc configurations
-export HISTCONTROL=ignoredups:erasedups
+
+# Realtime History Updates
+shopt -s histappend
+export HISTCONTROL=ignoredups
+#export HISTCONTROL=ignoredups:erasedups
 export HISTSIZE=9999
-# The below command works, but can act funny at times - use at your own risk
-#export PROMPT_COMMAND="history -n; history -w; history -c; history -r; ${PROMPT_COMMAND}"
-export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;36m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "
+export PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+# Colorized Prompt
+if [[ -z $(cat /proc/cpuinfo | grep hypervisor) ]];then
+  # Baremetal Systems display hostnames in Cyan
+  export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;36m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "
+else
+  # Virtualized Systems display hostnames in Green
+  export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;32m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "
+fi

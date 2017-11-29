@@ -1,0 +1,35 @@
+################################################################################
+#
+# Custom Bash Configurations
+#
+# Usage:
+#   1. Save this file as /etc/bashrc_custom
+#   2. Add the following to your ~/.bashrc
+#     # Source custom definitions
+#     if [[ -f /etc/bashrc_custom ]];then
+#       . /etc/bashrc_custom
+#     fi
+#   3. ???
+#   4. Profit
+#
+################################################################################
+# Realtime History Updates
+################################################################################
+
+shopt -s histappend
+export HISTCONTROL=ignoredups
+#export HISTCONTROL=ignoredups:erasedups
+export HISTSIZE=9999
+export PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
+
+################################################################################
+# Colorized Prompts
+################################################################################
+
+if [[ -z $(cat /proc/cpuinfo | grep hypervisor) ]];then
+  # Baremetal Systems display hostnames in Cyan
+  export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;36m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "
+else
+  # Virtualized Systems display hostnames in Green
+  export PS1="[\[\e[0;31m\]\u\[\e[0m\]]@[\[\e[0;32m\]\h\[\e[0m\]]:[\[\e[0;33m\]\w\[\e[0m\]] \\$ "
+fi
